@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertisseur Kilomètres ⇌ Miles</title>
+    <!-- Chargement de Tailwind CSS pour un style moderne et mobile-friendly -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuration de la police Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        /* Styles personnalisés pour le conteneur principal */
+        .converter-container {
+            max-width: 400px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* Style de focus personnalisé pour les entrées */
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="app" class="converter-container w-full bg-white p-6 sm:p-8 rounded-xl">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+            Convertisseur d'Unités
+        </h1>
+        <p class="text-center text-gray-500 mb-8">
+            Kilomètres (km) ⇌ Miles (mi)
+        </p>
+
+        <!-- Champ de saisie pour les Kilomètres -->
+        <div class="mb-6">
+            <label for="kilometers" class="block text-sm font-medium text-gray-700 mb-2">Kilomètres (km)</label>
+            <input type="number" id="kilometers"
+                   class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg text-lg transition duration-150 ease-in-out"
+                   placeholder="Entrez la valeur en km"
+                   oninput="convert('km')"
+                   autocomplete="off"
+                   min="0">
+        </div>
+
+        <!-- Séparateur visuel -->
+        <div class="flex items-center justify-center my-6">
+            <span class="text-2xl text-gray-400 font-bold">⇌</span>
+        </div>
+
+        <!-- Champ de saisie pour les Miles -->
+        <div class="mb-6">
+            <label for="miles" class="block text-sm font-medium text-gray-700 mb-2">Miles (mi)</label>
+            <input type="number" id="miles"
+                   class="input-field w-full px-4 py-3 border border-gray-300 rounded-lg text-lg transition duration-150 ease-in-out"
+                   placeholder="Entrez la valeur en miles"
+                   oninput="convert('miles')"
+                   autocomplete="off"
+                   min="0">
+        </div>
+
+        <!-- Bouton pour effacer les champs -->
+        <button onclick="clearFields()"
+                class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50">
+            Effacer
+        </button>
+
+        <!-- Message d'information/résultat -->
+        <p id="result-message" class="mt-6 text-sm text-center text-gray-500 h-5">
+            <!-- Les résultats seront affichés ici -->
+        </p>
+    </div>
+
+    <script>
+        // Taux de conversion : 1 Kilomètre ≈ 0.621371 Miles
+        const CONVERSION_RATE = 0.621371;
+
+        // Récupération des éléments du DOM
+        const kmInput = document.getElementById('kilometers');
+        const milesInput = document.getElementById('miles');
+        const resultMessage = document.getElementById('result-message');
+
+        /**
+         * Met à jour le message de résultat.
+         * @param {string} text - Le message à afficher.
+         * @param {string} type - Le type de conversion ('km' ou 'miles').
+         * @param {number} value - La valeur convertie.
+         */
+        function updateMessage(text, type, value) {
+            if (value > 0) {
+                resultMessage.textContent = text;
+                resultMessage.classList.remove('text-red-500', 'text-gray-500');
+                resultMessage.classList.add('text-green-600', 'font-medium');
+            } else {
+                 resultMessage.textContent = '';
+            }
+        }
+
+        /**
+         * Exécute la conversion en fonction du champ modifié.
+         * @param {string} source - 'km' si l'entrée km a été modifiée, 'miles' sinon.
+         */
+        function convert(source) {
+            resultMessage.textContent = ''; // Réinitialiser le message d'erreur/résultat
+
+            if (source === 'km') {
+                const kmValue = parseFloat(kmInput.value);
+
+                if (isNaN(kmValue) || kmValue < 0) {
+                    milesInput.value = '';
+                    kmInput.value = kmInput.value.replace(/[^0-9.]/g, ''); // Nettoyer l'entrée
+                    return;
+                }
+
+                // Conversion de km en miles
+                const milesValue = kmValue * CONVERSION_RATE;
+
+                // Affichage avec 4 décimales pour la précision
+                milesInput.value = milesValue.toFixed(4);
+
+                updateMessage(
+                    `${kmValue} km = ${milesValue.toFixed(4)} miles`,
+                    'km',
+                    kmValue
+                );
+
+            } else if (source === 'miles') {
+                const milesValue = parseFloat(milesInput.value);
+
+                if (isNaN(milesValue) || milesValue < 0) {
+                    kmInput.value = '';
+                     milesInput.value = milesInput.value.replace(/[^0-9.]/g, ''); // Nettoyer l'entrée
+                    return;
+                }
+
+                // Conversion de miles en km
+                // 1 Mile = 1 / CONVERSION_RATE Kilomètres
+                const kmValue = milesValue / CONVERSION_RATE;
+
+                // Affichage avec 4 décimales pour la précision
+                kmInput.value = kmValue.toFixed(4);
+
+                 updateMessage(
+                    `${milesValue} miles = ${kmValue.toFixed(4)} km`,
+                    'miles',
+                    milesValue
+                );
+            }
+        }
+
+        /**
+         * Efface les deux champs de saisie et le message.
+         */
+        function clearFields() {
+            kmInput.value = '';
+            milesInput.value = '';
+            resultMessage.textContent = '';
+            resultMessage.classList.remove('text-green-600', 'font-medium');
+            kmInput.focus(); // Remettre le focus sur le premier champ pour la convivialité
+        }
+
+        // Configuration initiale: s'assurer que l'entrée km est sélectionnée au chargement
+        window.onload = function() {
+            clearFields();
+        };
+
+    </script>
+</body>
+</html>
